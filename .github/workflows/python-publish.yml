@@ -40,7 +40,8 @@ jobs:
     - name: Run Distribution
       run: |
         rm -rf dist
-        pip install setuptools 
+        pip install setuptools
+        pip install wheel 
         pip wheel -w dist .
         python setup.py sdist
         python setup.py bdist_wheel
