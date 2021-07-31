@@ -22,7 +22,6 @@ on:
 
 jobs:
   deploy:
-    needs: release
     runs-on: ubuntu-latest
 
     steps:
