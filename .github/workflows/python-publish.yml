@@ -14,11 +14,11 @@ on:
       - "master"
   release:
     types: [published]
-  workflow_run:
-    workflows: ["Run Tests"]
-    branches: ["master"]
-    types:
-      - completed
+  # workflow_run:
+  #   workflows: ["Run Tests"]
+  #   branches: ["master"]
+  #   types:
+  #     - completed
 
 jobs:
   deploy:
