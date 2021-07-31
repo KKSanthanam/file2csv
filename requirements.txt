@@ -1,0 +1,4 @@
+# Required packages
+fastrelease
+twine
+pytest
