@@ -9,6 +9,6 @@ from file2csv.Converter import Converter
 class TestConverter():
     def test_trig(self, fixedfile, csvfile, specfile):
         converter = Converter(fixedfile=fixedfile, csvfile=csvfile, specfile=specfile)
-        (result, _,_,_,_) = converter.encoder_spec() 
+        (result, _,_,_,_, _) = converter.encoder_spec() 
         assert result
         
