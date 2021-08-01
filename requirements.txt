@@ -1,5 +1,6 @@
 # Required packages
 fastrelease
+argparse
 twine
 pytest
 coverage
