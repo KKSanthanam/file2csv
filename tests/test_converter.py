@@ -117,6 +117,3 @@ class EncoderTestSpec(unittest.TestCase):
         assert window_type.is_of_type('ABC')
         assert unicode_type.is_of_type('😀')
         assert utf8_type.to_out_type('😀') == '8J+YgA=='
-        
-
-        
