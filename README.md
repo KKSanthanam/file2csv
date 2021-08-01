@@ -1,6 +1,6 @@
 # File2CSV
 
-Project description Movement detector for RaspberryPi with Watch to watch objects coming into proximity. Pass pins Trigger and Echo. Pass offset to determine boundary for the object to come in
+Fixed width file to CSV
 
 ## Parse fixed width file
 
@@ -9,59 +9,37 @@ Project description Movement detector for RaspberryPi with Watch to watch object
 
 ### Features
 
-- Offset for object interference zone
-- Emits Object In and Out event
+- fixed2csv encoder
+- docker image to run the Apache Beam
+- CI/CD for publishing the PyPi package
 
 ### Installation
 
-Create library
-```console
-python setup.py bdist_wheel
-```
-
-
-_RaspberryPiMovementDetector_ is a registered [PyPI module](https://pypi.python.org/pypi/RaspberryPiMovementDetector), so the installation
+_file2csv_ is a registered [PyPI module](https://pypi.python.org/pypi/file2csv), so the installation
 with _pip_ is quite easy:
 
 ```console
-pip install RaspberryPiMovementDetector
+pip install file2csv
 ```
 
-## Examples
+Apache beam is built into docker image
 
-#### Basic usage
+Build docker image
+```console
+./dockerbuild.sh
+```
 
-```python
-import time
-from RPi.GPIO import GPIO
-from MovementDetector.Watch import Watch
-
-TRIG = 23
-ECHO = 24
-
-def func_moved_in(arg):
-  print("process for object entering field")
-
-def func_moved_out(arg):
-  print("process for object exiting field")
-
-OFFSET = 200 # 2m
-
-watch = Watch(gpio=GPIO, trig=TRIG, echo=ECHO, func_in=func_moved_in, func_out=func_moved_out, offset=OFFSET)
-
-watch.observe()
-
-time.sleep(100) # Sleep
-
-watch.stop()
+Run docker image with _remotedata_ volume
+```console
+./dockerrun.sh
 ```
 
 ## Development
 
-- Source hosted at [GitHub](https://github.com/KSanthanam/RaspberryPiMovementDetector)
-- Python module hostet at [PyPI](https://pypi.python.org/pypi/RaspberryPiMovementDetector)
+- Source hosted at [GitHub](https://github.com/KSanthanam/file2csv)
+- Python module hostet at [PyPI](https://pypi.python.org/pypi/file2csv)
 - Report issues, questions, feature requests on
-  [GitHub Issues](https://github.com/KSanthanam/RaspberryPiMovementDetector/issues)
+  [GitHub Issues](https://github.com/KSanthanam/file2csv/issues)
 
 ## License
 
