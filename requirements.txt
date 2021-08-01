@@ -2,3 +2,4 @@
 fastrelease
 twine
 pytest
+coverage

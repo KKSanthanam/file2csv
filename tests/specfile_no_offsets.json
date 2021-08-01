@@ -11,18 +11,7 @@
         "f9",
         "f10"
     ],
-    "Offsets": [
-        "5",
-        "12",
-        "3",
-        "2",
-        "13",
-        "7",
-        "10",
-        "13",
-        "20",
-        "13"
-    ],
+    "Offsets": [ ],
     "FixedWidthEncoding": "windows-1252",
     "IncludeHeader": "True",
     "DelimitedEncoding": "utf-8"
