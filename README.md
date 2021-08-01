@@ -34,12 +34,19 @@ Run docker image with _remotedata_ volume
 ./dockerrun.sh
 ```
 
-## Development
+### Development
 
 - Source hosted at [GitHub](https://github.com/KSanthanam/file2csv)
 - Python module hostet at [PyPI](https://pypi.python.org/pypi/file2csv)
 - Report issues, questions, feature requests on
   [GitHub Issues](https://github.com/KSanthanam/file2csv/issues)
+
+### Test
+Run test
+```console
+pytest
+```
+
 
 ## License
 
