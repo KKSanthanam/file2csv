@@ -4,7 +4,7 @@ from file2csv.Converter import Converter, Encodings
 
 valid_columns = ["f1", "f2", "f3", "f4", "f5", "f6", "f7", "f8", "f9", "f10"]
 valid_offsets = [5, 12, 3, 2, 13, 7, 10, 13, 20, 13]
-testdata = [
+spec_testdata = [
     pytest.param('fixedfile.txt', 'csvfile.csv', 'tests/specfile.json',
                  True,  valid_columns,
                  valid_offsets, 'windows-1252', True, 'utf-8',
@@ -24,16 +24,34 @@ testdata = [
     pytest.param('fixedfile.txt', 'csvfile.csv', 'specfile_no_offsets.json',
                  False, [], [],  'windows-1252', True, 'utf-8',
                  id="zero_offsets_spec_file"),
+    pytest.param('fixedfile.txt', 'csvfile.csv', 'specfile_invalid_enc_fixed.json',
+                 False, [], [],  'windows-1252', True, 'utf-8',
+                 id="junk_fixed_enc_spec_file"),
+    pytest.param('fixedfile.txt', 'csvfile.csv', 'specfile_invalid_enc_delimit.json',
+                 False, [], [],  'windows-1252', True, 'utf-8',
+                 id="junk_delimit_enc_spec_file"),
 ]
 
 
-@pytest.mark.parametrize('fixedfile, csvfile, specfile, expected_result, expected_columns, expected_offsets, expected_in_encoding, expected_header_on, expected_out_encoding', testdata)
+@pytest.mark.parametrize('fixedfile, csvfile, specfile, expected_result, expected_columns, expected_offsets, expected_in_encoding, expected_header_on, expected_out_encoding', spec_testdata)
 class TestConverter():
     def test_spec(self, fixedfile, csvfile, specfile, expected_result, expected_columns, expected_offsets, expected_in_encoding, expected_header_on, expected_out_encoding):
         converter = Converter(fixedfile=fixedfile,
                               csvfile=csvfile, specfile=specfile)
         (result, columns, offsets, fixed_with_encoding,
          included_header, delimited_encoding) = converter.encoder_spec()
+        assert result == expected_result
+        assert columns == expected_columns
+        assert offsets == expected_offsets
+        assert fixed_with_encoding == expected_in_encoding
+        assert included_header == expected_header_on
+        assert delimited_encoding == expected_out_encoding
+        
+    def test_encode(self, fixedfile, csvfile, specfile, expected_result, expected_columns, expected_offsets, expected_in_encoding, expected_header_on, expected_out_encoding):
+        converter = Converter(fixedfile=fixedfile,
+                              csvfile=csvfile, specfile=specfile)
+        (result, columns, offsets, fixed_with_encoding,
+         included_header, delimited_encoding) = converter.encode()
         assert result == expected_result
         assert columns == expected_columns
         assert offsets == expected_offsets

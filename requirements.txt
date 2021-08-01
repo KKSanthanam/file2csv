@@ -3,3 +3,4 @@ fastrelease
 twine
 pytest
 coverage
+apache-beam

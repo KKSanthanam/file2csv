@@ -29,6 +29,28 @@ class Encodings(Enum):
     WINDOWS1252 = 'windows-1252'
     UNICODEESCAPE = 'unicode-escape'
 
+    def describe(self):
+        # self is the member here
+        return self.name, self.value
+
+    def __str__(self):
+        return f'value of the encoding is {self.value}'
+
+    @classmethod
+    def default_delimited_enc(cls):
+        # cls here is the enumeration
+        return cls.UTF8
+
+    @classmethod
+    def default_fixedwidth_enc(cls):
+        # cls here is the enumeration
+        return cls.WINDOWS1252
+
+    @classmethod
+    def is_valid(cls, value):
+        # cls here is the enumeration
+        return value.lower() in cls._value2member_map_
+
 
 class Converter(object):
     # def __init__(self, fixedfile, csvfile):
@@ -46,9 +68,9 @@ class Converter(object):
         self._specfile = kwargs.get("specfile", None)
         self._columns = []
         self._offsets = []
-        self._fixed_with_encoding = 'windows-1252'
+        self._fixed_with_encoding = Encodings.default_fixedwidth_enc()
         self._included_header = False
-        self._delimited_encoding = 'utf-8'
+        self._delimited_encoding = Encodings.default_delimited_enc()
 
     def __str__(self):
         return f'Input file name is "{self._fixedfile}", File format specification is "{self._specfile}", and output file name is "{self._csvfile}"'
@@ -139,9 +161,31 @@ class Converter(object):
                 return result()
 
             try:
-                fixed_with_encoding = obj['FixedWidthEncoding']
+                fixed_with_encoding = obj['FixedWidthEncoding'].lower()
+                if not Encodings.is_valid(fixed_with_encoding):
+                    print(f"{fixed_with_encoding} is not valid encoding")
+                    parsed = False
+                    return result()
             except Exception as ex:
                 print(f"Error in parsing FixedWidthEncoding: {str(ex)}")
+                parsed = False
+                return result()
+
+            try:
+                included_header = bool(obj['IncludeHeader'])
+            except Exception as ex:
+                print(f"Error in parsing IncludeHeader: {str(ex)}")
+                parsed = False
+                return result()
+
+            try:
+                delimited_encoding = obj['DelimitedEncoding'].lower()
+                if not Encodings.is_valid(delimited_encoding):
+                    print(f"{delimited_encoding} is not valid encoding")
+                    parsed = False
+                    return result()
+            except Exception as ex:
+                print(f"Error in parsing DelimitedEncoding: {str(ex)}")
                 parsed = False
                 return result()
 
@@ -162,37 +206,7 @@ class Converter(object):
 
     def encode(self):
         """
-        spec for columns
-        ----------------
-
-        {
-        "ColumnNames": [
-            "f1",
-            "f2",
-            "f3",
-            "f4",
-            "f5",
-            "f6",
-            "f7",
-            "f8",
-            "f9",
-            "f10"
-        ],
-        "Offsets": [
-            "5",
-            "12",
-            "3",
-            "2",
-            "13",
-            "7",
-            "10",
-            "13",
-            "20",
-            "13"
-        ],
-        "FixedWidthEncoding": "windows-1252",
-        "IncludeHeader": "True",
-        "DelimitedEncoding": "utf-8"
-      }
+        Encode Input fixed width file using specfile
         """
-        pass
+        return self.encoder_spec()
+
