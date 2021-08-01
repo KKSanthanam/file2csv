@@ -43,7 +43,6 @@ jobs:
         pip install wheel 
         pip install twine 
         pip wheel -w dist .
-        python setup.py sdist
         python setup.py sdist bdist_wheel --verbose
     - name: Publish a Python distribution to PyPI
       # if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags')
