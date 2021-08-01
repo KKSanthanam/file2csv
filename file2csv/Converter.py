@@ -1,7 +1,27 @@
 import json
-from enum import Enum, unique
+import base64
+from enum import Enum, EnumMeta, unique
 from os.path import abspath, exists
 from concurrent.futures import ThreadPoolExecutor
+
+
+class EncodingEnumMeta(EnumMeta):
+    def __str__(cls):
+        lines = [f"Members of `{cls.__name__}` are:"]
+        for member in cls:
+            lines.append(f"- {member}")
+        return '\n'.join(lines)
+
+    def _contains(self, member):
+        return member in self._member_map_ \
+            or member in set(
+                map(lambda x: x.value, self._member_map_.values()))
+
+    def is_valid(self, member):
+        if self._contains(member):
+            return True
+        else:
+            return False
 
 
 @unique
@@ -47,9 +67,78 @@ class Encodings(Enum):
         return cls.WINDOWS1252
 
     @classmethod
-    def is_valid(cls, value):
+    def is_valid(cls, value) -> bool:
         # cls here is the enumeration
         return value.lower() in cls._value2member_map_
+
+    @classmethod
+    def to_out_type(cls, value) -> str:
+        def b64e(s):
+            return base64.b64encode(s.encode()).decode()
+        return b64e(value)
+
+    @classmethod
+    def is_of_type(cls, value) -> bool:
+        """
+            Python encodings
+            ascii()
+            bin()
+            bytes()
+            chr()
+            hex()
+            int()
+            oct()
+            ord()
+            str()  
+        """
+        # UTF8 = 'utf-8'
+        # UTF16 = 'utf-16'
+        # UTF32 = 'utf-32'
+        # ASCII = 'ascii'
+        # BINARY = 'binary'
+        # OCTAL = 'octal'
+        # HEXADECIMAL = 'hexadecimal'
+        # CP1252 = 'cp1252'
+        # WINDOWS1252 = 'windows-1252'
+        # UNICODEESCAPE = 'unicode-escape'
+
+        v = None
+        if cls == cls.UTF8 or cls == cls.UTF16 or cls == cls.UTF32 or cls == cls.UNICODEESCAPE:
+            try:
+                v = bytes(value)
+            except:
+                return False
+
+        if cls == cls.ASCII:
+            try:
+                v = ascii(value)
+            except:
+                return False
+
+        if cls == cls.BINARY:
+            try:
+                v = bin(value)
+            except:
+                return False
+
+        if cls == cls.OCTAL:
+            try:
+                v = oct(value)
+            except:
+                return False
+
+        if cls == cls.HEXADECIMAL:
+            try:
+                v = hex(value)
+            except:
+                return False
+
+        if cls == cls.WINDOWS1252 or cls == cls.CP1252:
+            try:
+                v = str(value)
+            except:
+                return False
+        return True
 
 
 class Converter(object):
@@ -76,7 +165,7 @@ class Converter(object):
         return f'specfile="{self._specfile}")'
 
     def encoder_spec(self):
-        def get_metadata(spec_file: str) -> tuple[bool, list[str], list[int], str, bool, str]:
+        def get_metadata(spec_file: str) -> tuple[bool, list[str], list[int], Encodings, bool, Encodings]:
             """
               spec for columns
               ----------------
@@ -114,9 +203,9 @@ class Converter(object):
             parsed = False
             columns = []
             offsets = []
-            fixed_with_encoding = "windows-1252"
+            fixed_with_encoding = Encodings("windows-1252")
             included_header = True
-            delimited_encoding = "utf-8"
+            delimited_encoding = Encodings("utf-8")
 
             def result() -> tuple[bool, list[str], list[int], str, bool, str]:
                 return (parsed, columns, offsets, fixed_with_encoding, included_header, delimited_encoding)
@@ -158,11 +247,12 @@ class Converter(object):
                 return result()
 
             try:
-                fixed_with_encoding = obj['FixedWidthEncoding'].lower()
-                if not Encodings.is_valid(fixed_with_encoding):
-                    print(f"{fixed_with_encoding} is not valid encoding")
+                fixed_with_encoding_str = obj['FixedWidthEncoding'].lower()
+                if not Encodings.is_valid(fixed_with_encoding_str):
+                    print(f"{fixed_with_encoding_str} is not valid encoding")
                     parsed = False
                     return result()
+                fixed_with_encoding = Encodings(fixed_with_encoding_str)
             except Exception as ex:
                 print(f"Error in parsing FixedWidthEncoding: {str(ex)}")
                 parsed = False
@@ -176,11 +266,12 @@ class Converter(object):
                 return result()
 
             try:
-                delimited_encoding = obj['DelimitedEncoding'].lower()
-                if not Encodings.is_valid(delimited_encoding):
-                    print(f"{delimited_encoding} is not valid encoding")
+                delimited_encoding_str = obj['DelimitedEncoding'].lower()
+                if not Encodings.is_valid(delimited_encoding_str):
+                    print(f"{delimited_encoding_str} is not valid encoding")
                     parsed = False
                     return result()
+                delimited_encoding = Encodings(delimited_encoding_str)
             except Exception as ex:
                 print(f"Error in parsing DelimitedEncoding: {str(ex)}")
                 parsed = False
@@ -213,6 +304,28 @@ class Converter(object):
             return []
         return self._columns
 
+    def get_fixed_encoding(self: object) -> Encodings:
+        if not self._parsed:
+            return Encodings.default_fixedwidth_enc()
+        return self._fixed_with_encoding
+
+    def get_fixed_encoding_str(self: object) -> str:
+        encode = self._fixed_with_encoding
+        if not self._parsed:
+            encode = Encodings.default_fixedwidth_enc()
+        return encode.name
+
+    def get_delimit_encoding(self: object) -> Encodings:
+        if not self._parsed:
+            return Encodings.default_delimited_enc()
+        return self._delimited_encoding
+
+    def get_delimit_encoding_str(self: object) -> str:
+        encode = self._delimited_encoding
+        if not self._parsed:
+            encode = Encodings.default_delimited_enc()
+        return encode.name
+
     def encode(self: object, line: str) -> tuple[bool, str]:
         """
         Encode Input fixed width file using specfile
@@ -229,5 +342,6 @@ class Converter(object):
             end = start + offset
             values.append(line[start:end])
             start = end
-        print(values)
-        return True, ",".join(values)
+        encoder = self.get_delimit_encoding()        
+        enc_values = [encoder.to_out_type(v) for v in values]
+        return True, ",".join(enc_values)
