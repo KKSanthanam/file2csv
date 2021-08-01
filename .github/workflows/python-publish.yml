@@ -6,7 +6,6 @@ on:
     branches:
       - master
       # - dev
-
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -42,6 +41,7 @@ jobs:
         rm -rf dist
         pip install setuptools
         pip install wheel 
+        pip install twine 
         pip wheel -w dist .
         python setup.py sdist
         python setup.py bdist_wheel
