@@ -2,8 +2,6 @@ import json
 import base64
 from enum import Enum, EnumMeta, unique
 from os.path import abspath, exists
-from concurrent.futures import ThreadPoolExecutor
-
 
 class EncodingEnumMeta(EnumMeta):
     def __str__(cls):
@@ -139,7 +137,6 @@ class Encodings(Enum):
             except:
                 return False
         return True
-
 
 class Converter(object):
     def __init__(self, **kwargs):
@@ -342,6 +339,6 @@ class Converter(object):
             end = start + offset
             values.append(line[start:end])
             start = end
-        encoder = self.get_delimit_encoding()        
+        encoder = self.get_delimit_encoding()
         enc_values = [encoder.to_out_type(v) for v in values]
         return True, ",".join(enc_values)

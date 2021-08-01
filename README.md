@@ -25,11 +25,13 @@ pip install file2csv
 Apache beam is built into docker image
 
 Build docker image
+
 ```console
 ./dockerbuild.sh
 ```
 
 Run docker image with _remotedata_ volume
+
 ```console
 ./dockerrun.sh
 ```
@@ -42,11 +44,12 @@ Run docker image with _remotedata_ volume
   [GitHub Issues](https://github.com/KSanthanam/file2csv/issues)
 
 ### Test
+
 Run test
+
 ```console
 pytest
 ```
-
 
 ## License
 
