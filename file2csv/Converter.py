@@ -53,30 +53,27 @@ class Encodings(Enum):
 
 
 class Converter(object):
-    # def __init__(self, fixedfile, csvfile):
     def __init__(self, **kwargs):
-        """ Converter(fixedfile=None, csvfile=None, columns=None)
+        """ Converter(specfile=None)
                 The Converter class.
                 Please always use *kwargs* in the constructor.
-                - *fixedfile*: Pass the input file name
-                - *csvfile*: Pass the output file name
                 - *specfile*: columns configuration
                 """
         super(Converter, self).__init__()
-        self._fixedfile = kwargs.get("fixedfile", None)
-        self._csvfile = kwargs.get("csvfile", None)
         self._specfile = kwargs.get("specfile", None)
+        self._parsed = False
         self._columns = []
         self._offsets = []
         self._fixed_with_encoding = Encodings.default_fixedwidth_enc()
         self._included_header = False
         self._delimited_encoding = Encodings.default_delimited_enc()
+        self.encoder_spec()
 
     def __str__(self):
-        return f'Input file name is "{self._fixedfile}", File format specification is "{self._specfile}", and output file name is "{self._csvfile}"'
+        return f'File format specification is "{self._specfile}"'
 
     def __repr__(self):
-        return f'Converter(fixedfile="{self._fixedfile}", csvfile="{self._csvfile}", specfile="{self._specfile}")'
+        return f'specfile="{self._specfile}")'
 
     def encoder_spec(self):
         def get_metadata(spec_file: str) -> tuple[bool, list[str], list[int], str, bool, str]:
@@ -198,15 +195,39 @@ class Converter(object):
                   included_header, delimited_encoding)
         if not parsed:
             return result
+        self._parsed = parsed
+        self._columns = columns
         self._offsets = offsets
         self._fixed_with_encoding = fixed_with_encoding
         self._included_header = included_header
         self._delimited_encoding = delimited_encoding
         return result
 
-    def encode(self):
+    def offsets(self: object) -> list[int]:
+        if not self._parsed:
+            return []
+        return self._offsets
+
+    def columns(self: object) -> list[str]:
+        if not self._parsed:
+            return []
+        return self._columns
+
+    def encode(self: object, line: str) -> tuple[bool, str]:
         """
         Encode Input fixed width file using specfile
         """
-        return self.encoder_spec()
+        if not self._parsed:
+            return (False, '')
+        if len(line) != sum(self.offsets()):
+            return (False, '')
 
+        values = []
+        offsets = self.offsets()
+        start = 0
+        for offset in offsets:
+            end = start + offset
+            values.append(line[start:end])
+            start = end
+        print(values)
+        return True, ",".join(values)
